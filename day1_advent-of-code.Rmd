@@ -1,0 +1,94 @@
+---
+title: "Advent of Code: Day 1"
+output: html_document
+date: "2023-12-12"
+---
+## Part One --------------------------------------------------------------------
+```{r, warning = FALSE, message = FALSE}
+library(dplyr)
+library(stringr)
+```
+
+```{r}
+# Load data
+day1_data <- read.table('day1_input.txt', sep=' ', header=FALSE)
+```
+
+```{r}
+# Remove nonnumeric characters from data values
+output <- day1_data %>%
+  mutate_all(~str_replace_all(., '[^0-9]', ''))
+
+day1_data <- bind_cols(day1_data, output)
+
+colnames(day1_data) <- c('raw', 'output')
+```
+
+```{r}
+# Repeat single values in cases when the first value is also the last value
+day1_data <- day1_data %>%
+  mutate(output = ifelse(nchar(output) == 1, paste0(output, output), output))
+```
+
+```{r}
+# Keep only the first and last numbers for each value
+day1_data <- day1_data %>%
+  mutate(output = ifelse(nchar(output) >2, paste0(str_sub(output, 1, 1), str_sub(output, -1, -1)), output))
+
+day1_data$output <- as.numeric(day1_data$output)
+
+paste('Answer: ', sum(day1_data$output))
+```
+## Part Two --------------------------------------------------------------------
+
+```{r}
+# load data and rename column
+day1_data <- read.table('day1_input.txt', sep='', header = FALSE)
+
+colnames(day1_data)[1] <- 'raw'
+```
+
+```{r}
+# dataframe with numbers and number names
+word_map <- data.frame(word = c('one', 'two', 'three', 'four', 'five', 'six',
+                                'seven', 'eight', 'nine'),
+                       number = c('1', '2', '3', '4', '5','6', '7', '8', '9'))
+
+# Add column of helper words with the last letter of each word repeated
+word_map$helper_words <- paste0(word_map$word, substr(word_map$word, nchar(word_map$word),
+                                                      nchar(word_map$word)))
+```
+
+```{r}
+#replace instances of number names with helper words
+day1_data <- day1_data %>%
+  mutate(output = str_replace_all(raw, setNames(word_map$helper_words, word_map$word)))
+
+# replace all helper words with numerals
+day1_data <- day1_data %>%
+  mutate(output = str_replace_all(output, setNames(word_map$number, word_map$word)))
+```
+
+```{r}
+# Remove non numeric characters
+day1_data <- day1_data %>%
+  mutate(output = str_replace_all(output, '[^0-9]', ''))
+```
+
+```{r}
+# Repeat single values in cases when the first value is also the last value
+day1_data <- day1_data %>%
+  mutate(output = ifelse(nchar(output) == 1, paste0(output, output), output))
+```
+
+```{r}
+# Keep only the first and last numbers for each value
+day1_data <- day1_data %>%
+  mutate(output = ifelse(nchar(output) >2, paste0(str_sub(output, 1, 1), str_sub(output, -1, -1)), output)) %>%
+  mutate(output = as.numeric(output))
+```
+
+```{r}
+# sum output and print
+paste('Answer:', sum(day1_data$output))
+```
